@@ -1,8 +1,13 @@
-# backend/main.py
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 import subprocess
 import asyncio
+
+from database import SessionLocal, engine
+import models, schemas, crud
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -13,25 +18,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Example NVRs and cameras
-nvrs = [
-    {
-        "id": 1,
-        "name": "NVR Front Building",
-        "cameras": [
-            {"id": 101, "name": "Gate", "ip": "192.168.1.101", "status": "unknown"},
-            {"id": 102, "name": "Lobby", "ip": "192.168.1.102", "status": "unknown"},
-        ],
-    },
-    {
-        "id": 2,
-        "name": "NVR Parking Lot",
-        "cameras": [
-            {"id": 201, "name": "Parking Entrance", "ip": "192.168.1.103", "status": "unknown"},
-            {"id": 202, "name": "Back Gate", "ip": "192.168.1.104", "status": "unknown"},
-        ],
-    },
-]
+def get_db():
+    db = SessionLocal()
+    try:
+        return db
+    finally:
+        db.close()
 
 def ping_camera(ip: str) -> bool:
     try:
@@ -42,25 +34,31 @@ def ping_camera(ip: str) -> bool:
 
 async def monitor_cameras():
     while True:
-        for nvr in nvrs:
-            for cam in nvr["cameras"]:
-                cam["status"] = "online" if ping_camera(cam["ip"]) else "offline"
-        await asyncio.sleep(180)  # 5 minutes
+        db = SessionLocal()
+        try:
+            cameras = db.query(models.Camera).all()
+            for cam in cameras:
+                status = "online" if ping_camera(cam.ip) else "offline"
+                crud.update_camera_status(db, cam.ip, status)
+        finally:
+            db.close()
+        await asyncio.sleep(180)
 
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(monitor_cameras())
 
-@app.get("/nvrs")
-def get_nvrs():
-    return nvrs
+@app.get("/nvrs", response_model=list[schemas.NVR])
+def list_nvrs(db: Session = Depends(get_db)):
+    return crud.get_nvrs(db)
 
-@app.post("/nvrs/{nvr_id}/cameras")
-def add_camera(nvr_id: int, cam: dict):
-    for nvr in nvrs:
-        if nvr["id"] == nvr_id:
-            cam["id"] = max([c["id"] for c in nvr["cameras"]], default=0) + 1
-            cam["status"] = "unknown"
-            nvr["cameras"].append(cam)
-            return {"message": "Camera added", "camera": cam}
-    return {"error": "NVR not found"}
+@app.post("/nvrs", response_model=schemas.NVR)
+def create_nvr(nvr: schemas.NVRCreate, db: Session = Depends(get_db)):
+    return crud.create_nvr(db, nvr)
+
+@app.post("/nvrs/{nvr_id}/cameras", response_model=schemas.Camera)
+def add_camera(nvr_id: int, cam: schemas.CameraCreate, db: Session = Depends(get_db)):
+    db_cam = crud.add_camera_to_nvr(db, nvr_id, cam)
+    if db_cam is None:
+        raise HTTPException(status_code=404, detail="NVR not found")
+    return db_cam
