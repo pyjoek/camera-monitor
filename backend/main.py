@@ -45,7 +45,7 @@ async def monitor_cameras():
         for nvr in nvrs:
             for cam in nvr["cameras"]:
                 cam["status"] = "online" if ping_camera(cam["ip"]) else "offline"
-        await asyncio.sleep(300)  # 5 minutes
+        await asyncio.sleep(180)  # 5 minutes
 
 @app.on_event("startup")
 async def startup_event():
