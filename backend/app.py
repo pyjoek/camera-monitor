@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import subprocess
 
 app = Flask(__name__)
@@ -10,6 +11,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # ----------------------
 # Models
@@ -63,7 +65,7 @@ def ping_camera(ip: str) -> bool:
 # Routes (Endpoints)
 # ----------------------
 
-@app.route('/nvrs', methods=['GET'])
+@app.route('/', methods=['GET'])
 def get_nvrs():
     """ Get all NVRs and their cameras """
     nvrs = NVR.query.all()
