@@ -5,14 +5,41 @@ function App() {
   const [nvrs, setNvrs] = useState([]);
   const [newCamera, setNewCamera] = useState({ name: "", ip: "" });
   const [selectedNvr, setSelectedNvr] = useState(null);
+    const [error, setError] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const baseUrl = "http://localhost:5000";
 
   const fetchNvrs = async () => {
     try {
-      const res = await fetch("http://localhost:8000/nvrs");
+      const res = await fetch(`${baseUrl}/`);
       const data = await res.json();
-      setNvrs(data);
+      if (Array.isArray(data)) {
+        setNvrs(data);
+      } else {
+        console.error("Error fetching NVRs:", error);
+        setError("Failed to fetch NVRs.");
+      }
     } catch (err) {
       console.error("Error fetching NVRs:", err);
+    }finally {
+      setLoading(false);
+    }
+  };
+
+  const addNvr = async () => {
+    try {
+      const res = await fetch(`${baseUrl}/new/nvr`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(nvrs),
+      });
+      await res.json();
+      setNvrs({name: ""})
+      fetchNvrs();
+    }
+    catch (err) {
+      console.log("Error adding nvr:", err)
     }
   };
 
@@ -44,7 +71,13 @@ function App() {
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h2>NVR & Camera Monitoring</h2>
 
-      {nvrs.map((nvr) => (
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p>{error}</p>
+      ) : nvrs.length === 0 ? (
+        <p>No NVRs found in the database.</p>
+      ) : nvrs.map((nvr) => (
         <div key={nvr.id} style={{ marginBottom: "30px" }}>
           <h3 style={{ color: "#333" }}>{nvr.name}</h3>
           <div
@@ -97,44 +130,81 @@ function App() {
         </div>
       ))}
 
-      {/* Add camera form */}
-      <div
-        style={{
-          marginTop: "20px",
-          padding: "15px",
-          border: "1px solid #ccc",
-          borderRadius: "10px",
-          width: "300px",
-        }}
-      >
-        <h4>Add New Camera</h4>
-        <input
-          type="text"
-          placeholder="Camera Name"
-          value={newCamera.name}
-          onChange={(e) => setNewCamera({ ...newCamera, name: e.target.value })}
-          style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
-        />
-        <input
-          type="text"
-          placeholder="Camera IP"
-          value={newCamera.ip}
-          onChange={(e) => setNewCamera({ ...newCamera, ip: e.target.value })}
-          style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
-        />
-        <button
-          onClick={addCamera}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between"
+      }}>
+        {/* Add NVR form */}
+        <div
           style={{
-            padding: "8px 12px",
-            background: "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
+            marginTop: "20px",
+            padding: "15px",
+            border: "1px solid #ccc",
+            borderRadius: "10px",
+            width: "300px",
           }}
         >
-          + Add Camera
-        </button>
+          <h4>Add New NVR</h4>
+          <input
+            type="text"
+            placeholder="NVR Name"
+            value={nvrs.name}
+            onChange={(e) => setNvrs({ ...nvrs, name: e.target.value })}
+            style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+          />
+          <button
+            onClick={addNvr}
+            style={{
+              padding: "8px 12px",
+              background: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+          >
+            + Add NVR
+          </button>
+        </div>
+        {/* Add Camera form */}
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "15px",
+            border: "1px solid #ccc",
+            borderRadius: "10px",
+            width: "300px",
+          }}
+        >
+          <h4>Add New Camera</h4>
+          <input
+            type="text"
+            placeholder="NVR Name"
+            value={newCamera.name}
+            onChange={(e) => setNewCamera({ ...newCamera, name: e.target.value })}
+            style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+          />
+          <input
+            type="text"
+            placeholder="Camera IP"
+            value={newCamera.ip}
+            onChange={(e) => setNewCamera({ ...newCamera, ip: e.target.value })}
+            style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+          />
+          <button
+            onClick={addCamera}
+            style={{
+              padding: "8px 12px",
+              background: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+          >
+            + Add Camera
+          </button>
+        </div>
       </div>
 
       <style>{`

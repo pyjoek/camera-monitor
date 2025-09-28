@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_cors import CORS
 import subprocess
 
 app = Flask(__name__)
+CORS(app)
 
 # MySQL configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost/nvr_db'
@@ -69,6 +71,8 @@ def ping_camera(ip: str) -> bool:
 def get_nvrs():
     """ Get all NVRs and their cameras """
     nvrs = NVR.query.all()
+    if not nvrs:
+        return jsonify([])
     response = []
     for nvr in nvrs:
         cameras = [{'id': cam.id, 'name': cam.name, 'ip': cam.ip, 'status': cam.status} for cam in nvr.cameras]
@@ -76,7 +80,7 @@ def get_nvrs():
     return jsonify(response)
 
 
-@app.route('/nvrs', methods=['POST'])
+@app.route('/new/nvrs', methods=['POST'])
 def create_nvr():
     """ Create a new NVR """
     data = request.get_json()
@@ -90,7 +94,6 @@ def create_nvr():
     db.session.commit()
 
     return jsonify({"message": "NVR created", "nvr": {"id": new_nvr.id, "name": new_nvr.name}})
-
 
 @app.route('/nvrs/<int:nvr_id>/cameras', methods=['POST'])
 def add_camera(nvr_id):
