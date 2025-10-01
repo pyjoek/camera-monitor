@@ -2,7 +2,10 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
+from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
+import atexit
+
 
 app = Flask(__name__)
 CORS(app)
@@ -18,6 +21,26 @@ migrate = Migrate(app, db)
 # ----------------------
 # Models
 # ----------------------
+
+
+def ping_all_cameras():
+    print("Pinging all cameras...")
+    cameras = Camera.query.all()
+    for camera in cameras:
+        is_online = ping_camera(camera.ip)
+        camera.status = "online" if is_online else "offline"
+    db.session.commit()
+    print("Camera statuses updated.")
+
+# ----------------------
+# Scheduler Setup
+# ----------------------
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=ping_all_cameras, trigger="interval", seconds=60)
+scheduler.start()
+
+# Shutdown scheduler on app exit
+atexit.register(lambda: scheduler.shutdown())
 
 class NVR(db.Model):
     __tablename__ = 'nvrs'
@@ -69,6 +92,8 @@ def ping_camera(ip: str) -> bool:
 
 @app.route('/', methods=['GET'])
 def get_nvrs():
+    ping_all_cameras()
+    
     nvrs = NVR.query.all()
     if not nvrs:
         return jsonify([])
@@ -113,9 +138,14 @@ def create_nvr():
 @app.route('/nvrs/<nvr_id>/cameras', methods=['POST'])
 def add_camera(nvr_id):
     """ Add a new camera to an NVR """
+    # Check if IP already exists
     data = request.get_json()
     camera_name = data.get('name')
     camera_ip = data.get('ip')
+    existing_camera = Camera.query.filter_by(ip=camera_ip).first()
+    if existing_camera:
+        return jsonify({"error": "Camera with this IP already exists"}), 400
+    
     # nvr_id = data.get('nvr_id')
 
     if not camera_name or not camera_ip or not nvr_id:
@@ -133,7 +163,7 @@ def add_camera(nvr_id):
     return jsonify({"message": "Camera added", "camera": {"id": new_camera.id, "name": new_camera.name, "ip": new_camera.ip, "status": new_camera.status}})
 
 
-@app.route('/nvrs/<int:nvr_id>/cameras', methods=['GET'])
+@app.route('/nvrs/<int:nvr_id>/camera', methods=['GET'])
 def get_cameras(nvr_id):
     """ Get all cameras for a specific NVR """
     nvr = NVR.query.get(nvr_id)
@@ -144,10 +174,10 @@ def get_cameras(nvr_id):
     return jsonify(cameras)
 
 
-@app.route('/cameras/status/<string:ip>', methods=['GET'])
-def update_camera_status(ip):
+@app.route('/cameras/status', methods=['GET'])
+def update_camera_status():
     """ Update camera status by pinging the camera's IP """
-    camera = Camera.query.filter_by(ip=ip).first()
+    camera = Camera.query.all()
     if not camera:
         return jsonify({"error": "Camera not found"}), 404
 

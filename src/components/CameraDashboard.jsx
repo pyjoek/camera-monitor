@@ -33,7 +33,7 @@ const CameraDashboard = () => {
 
   useEffect(() => {
     fetchNvrs();
-    const interval = setInterval(fetchNvrs, 1000);
+    const interval = setInterval(fetchNvrs, 30000);
     return () => clearInterval(interval);
   }, []);
 
