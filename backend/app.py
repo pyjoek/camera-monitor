@@ -110,13 +110,13 @@ def create_nvr():
 
     return jsonify({"message": "NVR created", "nvr": {"id": new_nvr.id, "name": new_nvr.name}})
 
-@app.route('/new/camera', methods=['POST'])
-def add_camera():
+@app.route('/nvrs/<nvr_id>/cameras', methods=['POST'])
+def add_camera(nvr_id):
     """ Add a new camera to an NVR """
     data = request.get_json()
     camera_name = data.get('name')
     camera_ip = data.get('ip')
-    nvr_id = data.get('nvr_id')
+    # nvr_id = data.get('nvr_id')
 
     if not camera_name or not camera_ip or not nvr_id:
         return jsonify({"error": "Camera name, IP and NVR are required"}), 400

@@ -1,5 +1,5 @@
 import React from 'react';
-import CameraDashboard from './components/cameraDashboard';
+import CameraDashboard from './components/CameraDashboard';
 
 function App() {
   return (
