@@ -93,7 +93,7 @@ def ping_camera(ip: str) -> bool:
 @app.route('/', methods=['GET'])
 def get_nvrs():
     ping_all_cameras()
-    
+
     nvrs = NVR.query.all()
     if not nvrs:
         return jsonify([])
@@ -172,21 +172,6 @@ def get_cameras(nvr_id):
 
     cameras = [{'id': cam.id, 'name': cam.name, 'ip': cam.ip, 'status': cam.status} for cam in nvr.cameras]
     return jsonify(cameras)
-
-
-@app.route('/cameras/status', methods=['GET'])
-def update_camera_status():
-    """ Update camera status by pinging the camera's IP """
-    camera = Camera.query.all()
-    if not camera:
-        return jsonify({"error": "Camera not found"}), 404
-
-    status = "online" if ping_camera(ip) else "offline"
-    camera.status = status
-    db.session.commit()
-
-    return jsonify({"message": "Camera status updated", "camera": {"id": camera.id, "name": camera.name, "ip": camera.ip, "status": camera.status}})
-
 
 # ----------------------
 # Run Flask App
