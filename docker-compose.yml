@@ -1,7 +1,7 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: nvr_mysql
+    container_name: camera_mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -12,14 +12,23 @@ services:
       - mysql_data:/var/lib/mysql
 
   flask_app:
-    build: .
-    container_name: nvr_api
+    build: ./backend
+    container_name: camera_api
     depends_on:
       - mysql
     environment:
       DATABASE_URL: "mysql+mysqlconnector://root:root@mysql/nvr_db"
     ports:
       - "5000:5000"
+    restart: always
+
+  react_app:
+    build: ./frontend
+    container_name: camera_frontend
+    depends_on:
+      - flask_app
+    ports:
+      - "3000:80"
     restart: always
 
 volumes:
