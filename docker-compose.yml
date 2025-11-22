@@ -1,0 +1,26 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: nvr_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nvr_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  flask_app:
+    build: .
+    container_name: nvr_api
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_URL: "mysql+mysqlconnector://root:root@mysql/nvr_db"
+    ports:
+      - "5000:5000"
+    restart: always
+
+volumes:
+  mysql_data:
