@@ -23,7 +23,7 @@ services:
     restart: always
 
   react_app:
-    build: ./frontend
+    build: ./react
     container_name: camera_frontend
     depends_on:
       - flask_app
