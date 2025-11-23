@@ -4,8 +4,16 @@ In this project it has a website based and mobile app plus single backend to pow
 
 ## Instructions
 
-### First Make sure you have installed all the required libraries for python backend
+### Make sure you have installed all the required libraries for python backend
      - source bin/activate
+     - pip install -r requirements.txt
+
+### Initiate Migration, the rest of models if created they will be migrated automatically 
      - flask db init
      - flask db migrate -m "the comment"
      - flask db upgrade
+
+### Start the Python Backend then the React Project and the Flutter Project
+     - python app.py
+     - npm start
+     - flutter run / or click run in the void function in your main file starter project
