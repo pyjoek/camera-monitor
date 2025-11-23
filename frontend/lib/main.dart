@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -24,9 +27,34 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   // The pages you want to switch between
-  final List<Widget> _pages = <Widget>[
+  List<Widget> get _pages => <Widget>[
     Center(child: Text("Home Page")),
-    Center(child: Text("Camera Page")),
+    // create a map to display data from fetchData function
+    FutureBuilder<Map>(
+      future: fetchData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {          
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (snapshot.hasData) {
+          final data = snapshot.data!;
+          final cameras = data['cameras'][0]['status'];
+          final nvr = data['name'];
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Camera Status: ${cameras}'),
+                Text('NVR: ${nvr}'),
+              ],
+            ),
+          );
+        } else {
+          return Center(child: Text('No data available'));
+        }
+      },
+    ),
     Center(child: Text("Settings Page")),
   ];
 
@@ -34,6 +62,17 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  // create a function to fetch data from a given url
+  Future<Map> fetchData() async {
+    const String baseUrl = "http://127.0.0.1:5000";
+    final response = await http.get(Uri.parse(baseUrl));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)[0];
+    } else {
+      throw Exception('Failed to load data');
+    }
   }
 
   @override
