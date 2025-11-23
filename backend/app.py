@@ -6,12 +6,11 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
 import atexit
 
-
 app = Flask(__name__)
 CORS(app)
 
 # MySQL configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost/nvr_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost/nvr_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
@@ -21,7 +20,6 @@ migrate = Migrate(app, db)
 # ----------------------
 # Models
 # ----------------------
-
 
 def ping_all_cameras():
     print("Pinging all cameras...")
