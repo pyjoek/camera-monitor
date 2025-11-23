@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const AddCameraModal = ({ isOpen, onClose, onAdd, nvrList }) => {
   const [name, setName] = useState('');
   const [ip, setIp] = useState('');
-  const [selectedNvrId, setSelectedNvrId] = useState(nvrList.length > 0 ? nvrList[0].id : null);
+  const [selectedNvrId, setSelectedNvrId] = useState(nvrList.length > 0 ? nvrList[0].id : "");
 
   if (!isOpen) return null;
 
@@ -27,6 +27,7 @@ const AddCameraModal = ({ isOpen, onClose, onAdd, nvrList }) => {
             onChange={(e) => setSelectedNvrId(parseInt(e.target.value))}
             style={{ width: '100%', padding: '8px', marginBottom: '12px' }}
           >
+            <option value="" disabled>Select NVR</option>
             {nvrList.map(nvr => (
               <option key={nvr.id} value={nvr.id}>{nvr.name}</option>
             ))}

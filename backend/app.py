@@ -51,14 +51,27 @@ run_migrations()
 # Models
 # ----------------------
 
+# def ping_all_cameras():
+#     print("Pinging all cameras...")
+#     cameras = Camera.query.all()
+#     for camera in cameras:
+#         is_online = ping_camera(camera.ip)
+#         camera.status = "online" if is_online else "offline"
+#     db.session.commit()
+#     print("Camera statuses updated.")
+
 def ping_all_cameras():
-    print("Pinging all cameras...")
-    cameras = Camera.query.all()
-    for camera in cameras:
-        is_online = ping_camera(camera.ip)
-        camera.status = "online" if is_online else "offline"
-    db.session.commit()
-    print("Camera statuses updated.")
+    with app.app_context():
+        print("Pinging all cameras...")
+        cameras = Camera.query.all()
+
+        for camera in cameras:
+            is_online = ping_camera(camera.ip)
+            camera.status = "online" if is_online else "offline"
+
+        db.session.commit()
+        print("Camera statuses updated.")
+
 
 # ----------------------
 # Scheduler Setup
