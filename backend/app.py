@@ -1,21 +1,51 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from flask_migrate import Migrate, upgrade
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
 import atexit
+import mysql.connector
+from mysql.connector import errorcode
 
 app = Flask(__name__)
 CORS(app)
 
-# MySQL configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost/nvr_db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+DB_NAME = "nvr_db"
+
+# create database if it doesn't exist
+def create_database_if_not_exists():
+    try:
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="dev",
+            password="12345"
+        )
+        cursor = conn.cursor()
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    except mysql.connector.Error as err:
+        print("Database creation failed:", err)
 
 # Initialize the database
+create_database_if_not_exists()
+
+# MySQL configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://dev:12345@localhost/nvr_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+# Auto apply migrations
+def run_migrations():
+    with app.app_context():
+        upgrade()
+
+run_migrations()
 
 # ----------------------
 # Models
