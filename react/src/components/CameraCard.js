@@ -2,7 +2,7 @@
 import React from 'react';
 
 const CameraCard = ({ camera }) => {
-  const { name, ip, status } = camera;
+  const { CameraName, ip, status } = camera;
 
   const getStatusColor = () => {
     if (status === 'online') return 'green';
@@ -25,7 +25,7 @@ const CameraCard = ({ camera }) => {
       backgroundColor: '#f9f9f9',
       boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     }}>
-      <h4 style={{ marginBottom: '8px' }}>{name}</h4>
+      <h4 style={{ marginBottom: '8px' }}>{CameraName}</h4>
       <p style={{ margin: '4px 0' }}><strong>IP:</strong> {ip}</p>
       <p style={{ margin: '4px 0' }}><strong>Status:</strong> <span style={{ color: getStatusColor(), fontWeight: 'bold' }}>{status}</span></p>
       <div style={{ marginTop: '8px' }}>

@@ -5,7 +5,7 @@ import CameraCard from './CameraCard';
 const NvrCard = ({ nvr }) => {
   return (
     <div style={{ marginBottom: '30px' }}>
-      <h2>{nvr.name}</h2>
+      <h2>{nvr.NvrName}</h2>
       <div style={{
         display: 'flex',
         flexWrap: 'wrap',
