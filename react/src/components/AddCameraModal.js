@@ -29,7 +29,7 @@ const AddCameraModal = ({ isOpen, onClose, onAdd, nvrList }) => {
           >
             <option value="" disabled>Select NVR</option>
             {nvrList.map(nvr => (
-              <option key={nvr.id} value={nvr.id}>{nvr.name}</option>
+              <option key={nvr.id} value={nvr.id}>{nvr.NvrName}</option>
             ))}
           </select>
 
