@@ -26,6 +26,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+  double height = 0;
+  double width = 0;
   // The pages you want to switch between
   List<Widget> get _pages => <Widget>[
     Center(child: Text("Home Page")),
@@ -41,21 +43,35 @@ class _MyHomePageState extends State<MyHomePage> {
           final data = snapshot.data!;
           final cameras = data['cameras'][0]['status'];
           final nvr = data['name'];
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+          return Column(
               children: [
+                SizedBox(height: 10,),
+                Center(
+                  child: Container(
+                    height: height * 0.1,
+                    width: width * 0.9,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [BoxShadow(
+                        offset: Offset(0, 0),
+                        blurRadius: 3,
+                        color: Colors.black,
+                        spreadRadius: 0
+                        )
+                      ]
+                    ),
+                  ),
+                ),
                 Text('Camera Status: ${cameras}'),
                 Text('NVR: ${nvr}'),
               ],
-            ),
           );
         } else {
           return Center(child: Text('No data available'));
         }
       },
     ),
-    Center(child: Text("Settings Page")),
   ];
 
   void _onItemTapped(int index) {
@@ -77,6 +93,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    height = MediaQuery.of(context).size.height;
+    width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Camera Monitor'),
@@ -93,9 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.camera),
             label: 'Camera',
-          ),        BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
           ),
         ],
       ),
