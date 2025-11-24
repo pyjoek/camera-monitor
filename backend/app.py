@@ -144,7 +144,7 @@ def get_nvrs():
         cameras = [
             {
                 'id': cam.id,
-                'name': cam.name,
+                'CameraName': cam.name,
                 'ip': cam.ip,
                 'status': cam.status
             }
@@ -153,7 +153,7 @@ def get_nvrs():
 
         response.append({
             'id': nvr.id,
-            'name': nvr.name,
+            'NvrName': nvr.name,
             'cameras': cameras
         })
 
