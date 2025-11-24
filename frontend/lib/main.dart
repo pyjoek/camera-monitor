@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
     futureData = fetchData();
 
     // 🔥 Refresh API every 1 minute
-    Timer.periodic(Duration(minutes: 1), (timer) {
+    Timer.periodic(Duration(seconds: 10), (timer) {
       setState(() {
         futureData = fetchData();
       });
