@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
         } else if (snapshot.hasData) {
           final data = snapshot.data!;
           final cameras = data['cameras'];   // <-- no [0]
-          final nvr = data['name'];
+          final nvr = data['NvrName'];
 
           return Column(
             children: [
