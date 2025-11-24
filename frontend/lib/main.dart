@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Camera Monitor',
+      title: 'Gold Zanzibar Camera Monitor',
       debugShowCheckedModeBanner: false,
       home: MyHomePage(),
     );
@@ -206,9 +206,6 @@ class _MyHomePageState extends State<MyHomePage> {
     width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Camera Monitor'),
-      ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
