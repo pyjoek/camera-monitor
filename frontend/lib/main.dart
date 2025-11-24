@@ -61,10 +61,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         )
                       ]
                     ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Camera Status: ${cameras}'),
+                        Text('NVR: ${nvr}'),
+                      ],
+                    ),
                   ),
                 ),
-                Text('Camera Status: ${cameras}'),
-                Text('NVR: ${nvr}'),
               ],
           );
         } else {
