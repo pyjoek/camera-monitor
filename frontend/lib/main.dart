@@ -31,9 +31,72 @@ class _MyHomePageState extends State<MyHomePage> {
   double width = 0;
   // The pages you want to switch between
   List<Widget> get _pages => <Widget>[
-    Center(child: Text("Home Page")),
-    // create a map to display data from fetchData function
-    FutureBuilder<Map>(
+    FutureBuilder<List<dynamic>>(
+      future: fetchData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {          
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (snapshot.hasData) {
+          final List<dynamic> nvrs = snapshot.data!;
+
+          return ListView(
+            children: nvrs.map<Widget>((nvr) {
+              final cameras = nvr['cameras'];
+              final nvrName = nvr['NvrName'];
+
+              return Column(
+                children: [
+                  SizedBox(height: 10),
+
+                  // NVR title
+                  Text(
+                    'NVR: $nvrName',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+
+                  // Loop through cameras of this NVR
+                  ...cameras.map<Widget>((camera) {
+                    return Center(
+                      child: Container(
+                        height: 100,
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              offset: Offset(0, 0),
+                              blurRadius: 3,
+                              color: Colors.black26,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Camera Name: ${camera['CameraName']}"),
+                            Text("IP: ${camera['ip']}"),
+                            Text("Status: ${camera['status']}"),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
+              );
+            }).toList(),
+          );
+
+
+        } else {
+          return Center(child: Text('No data available'));
+        }
+      },
+    ),
+    FutureBuilder<List<dynamic>>(
       future: fetchData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -42,8 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
           final data = snapshot.data!;
-          final cameras = data['cameras'];   // <-- no [0]
-          final nvr = data['NvrName'];
+          final cameras = data[0]['cameras'];
+          final nvr = data[0]['NvrName'];
 
           return Column(
             children: [
@@ -92,11 +155,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // create a function to fetch data from a given url
-  Future<Map> fetchData() async {
+  Future<List<dynamic>> fetchData() async {
     const String baseUrl = "http://127.0.0.1:5000";
     final response = await http.get(Uri.parse(baseUrl));
     if (response.statusCode == 200) {
-      return jsonDecode(response.body)[0];
+      return jsonDecode(response.body) as List<dynamic>;
     } else {
       throw Exception('Failed to load data');
     }
