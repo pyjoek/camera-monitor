@@ -42,37 +42,42 @@ class _MyHomePageState extends State<MyHomePage> {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
           final data = snapshot.data!;
-          final cameras = data['cameras'][0]['status'];
+          final cameras = data['cameras'];   // <-- no [0]
           final nvr = data['name'];
+
           return Column(
-              children: [
-                SizedBox(height: 10,),
-                Center(
+            children: [
+              SizedBox(height: 10),
+              ...cameras.map<Widget>((camera) {
+                return Center(
                   child: Container(
                     height: height * 0.1,
                     width: width * 0.9,
+                    margin: EdgeInsets.only(bottom: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(25),
-                      boxShadow: [BoxShadow(
-                        offset: Offset(0, 0),
-                        blurRadius: 3,
-                        color: Colors.black,
-                        spreadRadius: 0
+                      boxShadow: [
+                        BoxShadow(
+                          offset: Offset(0, 0),
+                          blurRadius: 3,
+                          color: Colors.black,
                         )
-                      ]
+                      ],
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Camera Status: ${cameras}'),
-                        Text('NVR: ${nvr}'),
+                        Text('Camera Status: ${camera['status']}'),
+                        Text('NVR: $nvr'),
                       ],
                     ),
                   ),
-                ),
-              ],
+                );
+              }).toList(),
+            ],
           );
+
         } else {
           return Center(child: Text('No data available'));
         }
