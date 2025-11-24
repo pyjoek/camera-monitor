@@ -215,12 +215,12 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: (index) => setState(() => _selectedIndex = index),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Icon(Icons.camera),
+            label: 'All Cameras',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.camera),
-            label: 'Offline',
+            icon: Icon(Icons.offline_bolt),
+            label: 'Offline Cameras',
           ),
         ],
       ),
