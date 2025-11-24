@@ -89,8 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             }).toList(),
           );
-
-
         } else {
           return Center(child: Text('No data available'));
         }
@@ -104,43 +102,56 @@ class _MyHomePageState extends State<MyHomePage> {
         } else if (snapshot.hasError) {          
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
-          final data = snapshot.data!;
-          final cameras = data[0]['cameras'];
-          final nvr = data[0]['NvrName'];
+          final List<dynamic> nvrs = snapshot.data!;
 
-          return Column(
-            children: [
-              SizedBox(height: 10),
-              ...cameras.map<Widget>((camera) {
-                return Center(
-                  child: Container(
-                    height: height * 0.1,
-                    width: width * 0.9,
-                    margin: EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          offset: Offset(0, 0),
-                          blurRadius: 3,
-                          color: Colors.black,
-                        )
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Camera Status: ${camera['status']}'),
-                        Text('NVR: $nvr'),
-                      ],
-                    ),
+          return ListView(
+            children: nvrs.map<Widget>((nvr) {
+              final cameras = nvr['cameras'];
+              final nvrName = nvr['NvrName'];
+
+              return Column(
+                children: [
+                  SizedBox(height: 10),
+
+                  // NVR title
+                  Text(
+                    'NVR: $nvrName',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                );
-              }).toList(),
-            ],
-          );
 
+                  // Loop through cameras of this NVR
+                  ...cameras.map<Widget>((camera) {
+                    return Center(
+                      child: Container(
+                        height: 100,
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              offset: Offset(0, 0),
+                              blurRadius: 3,
+                              color: Colors.black26,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Camera Name: ${camera['CameraName']}"),
+                            Text("IP: ${camera['ip']}"),
+                            Text("Status: ${camera['status']}"),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
+              );
+            }).toList(),
+          );
         } else {
           return Center(child: Text('No data available'));
         }
