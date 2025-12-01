@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.6.0
   flutter_local_notifications: ^19.5.0
+  awesome_notifications: ^0.10.1
 
 dev_dependencies:
   flutter_test:
