@@ -58,10 +58,6 @@ class _MyHomePageState extends State<MyHomePage> {
   double width = 0;
 
   late Future<List<dynamic>> futureData;
-  final Set<String> _offlineCameras = {};
-  String cameraKey(String nvr, String camera, String ip) =>
-    '$nvr|$camera|$ip';
-
 
   @override
   void initState() {
@@ -109,48 +105,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // 🔔 Local notification
-  void _sendOfflineNotification(String nvr, String camera, String ip) {
-    _offlineCameras.add(cameraKey(nvr, camera, ip));
-    _updateOfflineNotification();
-  }
-
-  void cameraCameOnline(String nvr, String camera, String ip) {
-    _offlineCameras.remove(cameraKey(nvr, camera, ip));
-    _updateOfflineNotification();
-  }
-
-  void _updateOfflineNotification() {
-    if (_offlineCameras.isEmpty) {
-      AwesomeNotifications().cancel(1001);
-      return;
-    }
-
-    final body = _offlineCameras
-        .map((c) => c.split('|')[1]) // camera name
-        .join('\n');
-
+  void _sendOfflineNotification(String nvrName, String cameraName, String ip) {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
-        id: 1001, // SAME ID always
+        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         channelKey: 'camera_alerts',
-        title: '⚠️ ${_offlineCameras.length} Cameras Offline',
-        body: body,
-        notificationLayout: NotificationLayout.BigText,
+        title: '⚠️ Camera Offline',
+        body: '$cameraName ($ip) on $nvrName is OFFLINE',
+        notificationLayout: NotificationLayout.Default,
       ),
     );
   }
-  // second single call function
-  // void _sendOfflineNotification(String nvrName, String cameraName, String ip) {
-  //   AwesomeNotifications().createNotification(
-  //     content: NotificationContent(
-  //       id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-  //       channelKey: 'camera_alerts',
-  //       title: '⚠️ Camera Offline',
-  //       body: '$cameraName ($ip) on $nvrName is OFFLINE',
-  //       notificationLayout: NotificationLayout.Default,
-  //     ),
-  //   );
-  // }
 
   // ------------------ UI Below ------------------
 
