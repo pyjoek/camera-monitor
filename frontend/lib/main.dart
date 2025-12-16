@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     futureData = fetchData();
 
     // Refresh every 5 minutes
-    Timer.periodic(Duration(minutes: 5), (timer) {
+    Timer.periodic(Duration(seconds: 30), (timer) {
       setState(() {
         futureData = fetchData();
       });
