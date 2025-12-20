@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Fetch data from API
   Future<List<dynamic>> fetchData() async {
-    const String baseUrl = "http://127.0.0.1:5000";
+    const String baseUrl = "http://10.0.4.136:5000";
     final response = await http.get(Uri.parse(baseUrl));
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as List<dynamic>;
