@@ -1,3 +1,7 @@
+ip =  10.0.4.136
+
+
+
 INSERT INTO nvrs (name) VALUES
 ('Small NVR'),
 ('New Outside Room NVR'),
