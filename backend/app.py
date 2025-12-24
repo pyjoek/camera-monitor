@@ -5,6 +5,8 @@ from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
 import atexit
+import time
+import os
 import mysql.connector
 from mysql.connector import errorcode
 
@@ -14,38 +16,58 @@ CORS(app)
 DB_NAME = "nvr_db"
 
 # create database if it doesn't exist
-def create_database_if_not_exists():
-    try:
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="dev",
-            password="12345"
-        )
-        cursor = conn.cursor()
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
-        conn.commit()
-        cursor.close()
-        conn.close()
+# def create_database_if_not_exists():
+#     try:
+#         conn = mysql.connector.connect(
+#             host="localhost",
+#             user="dev",
+#             password="12345"
+#         )
+#         cursor = conn.cursor()
+#         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
+#         conn.commit()
+#         cursor.close()
+#         conn.close()
 
-    except mysql.connector.Error as err:
-        print("Database creation failed:", err)
+#     except mysql.connector.Error as err:
+#         print("Database creation failed:", err)
 
-# Initialize the database
-create_database_if_not_exists()
+# # Initialize the database
+# create_database_if_not_exists()
 
 # MySQL configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://dev:12345@localhost/nvr_db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://dev:12345@localhost/nvr_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    "DATABASE_URL",
+    "mysql+mysqlconnector://root:root@mysql/nvr_db"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+def wait_for_mysql():
+    for i in range(15):
+        try:
+            conn = mysql.connector.connect(
+                host="mysql",
+                user="root",
+                password="root",
+                database="nvr_db"
+            )
+            conn.close()
+            print("MySQL is ready")
+            return
+        except mysql.connector.Error as e:
+            print("Waiting for MySQL...", e)
+            time.sleep(3)
+    raise RuntimeError("MySQL never became ready")
+
+wait_for_mysql()
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # Auto apply migrations
-def run_migrations():
-    with app.app_context():
-        upgrade()
-
-run_migrations()
+with app.app_context():
+    upgrade()
 
 # ----------------------
 # Models

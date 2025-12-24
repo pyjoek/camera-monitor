@@ -1,3 +1,13 @@
+INSERT INTO nvrs (name) VALUES
+('Small NVR'),
+('New Outside Room NVR'),
+('DS-7732NI-K4');
+
+
+
+
+
+
 INSERT INTO cameras (name, ip, nvr_id) VALUES
 -- Small NVR (nvr_id = 1)
 ('sultan bar', '192.168.0.6', 1),
