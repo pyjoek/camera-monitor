@@ -11,7 +11,7 @@ const CameraDashboard = () => {
   const [showNvrModal, setShowNvrModal] = useState(false);
   const [showCameraModal, setShowCameraModal] = useState(false);
 
-  const baseUrl = 'http://localhost:5000';
+  const baseUrl = 'http://10.0.4.136:5000';
 
   const fetchNvrs = async () => {
     try {
