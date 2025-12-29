@@ -7,8 +7,8 @@ import subprocess
 import atexit
 import time
 import os
-import mysql.connector
-from mysql.connector import errorcode
+#import mysql.connector
+#from mysql.connector import errorcode
 
 app = Flask(__name__)
 CORS(app)
