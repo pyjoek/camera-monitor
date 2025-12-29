@@ -15,52 +15,32 @@ CORS(app)
 
 DB_NAME = "nvr_db"
 
-# create database if it doesn't exist
-# def create_database_if_not_exists():
-#     try:
-#         conn = mysql.connector.connect(
-#             host="localhost",
-#             user="dev",
-#             password="12345"
-#         )
-#         cursor = conn.cursor()
-#         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
-#         conn.commit()
-#         cursor.close()
-#         conn.close()
-
-#     except mysql.connector.Error as err:
-#         print("Database creation failed:", err)
-
-# # Initialize the database
-# create_database_if_not_exists()
-
 # MySQL configuration
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://dev:12345@localhost/nvr_db'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-    "DATABASE_URL",
-    "mysql+mysqlconnector://root:root@mysql/nvr_db"
-)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://dev:12345@localhost/nvr_db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+#     "DATABASE_URL",
+#     "mysql+mysqlconnector://root:root@mysql/nvr_db"
+# )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-def wait_for_mysql():
-    for i in range(15):
-        try:
-            conn = mysql.connector.connect(
-                host="mysql",
-                user="root",
-                password="root",
-                database="nvr_db"
-            )
-            conn.close()
-            print("MySQL is ready")
-            return
-        except mysql.connector.Error as e:
-            print("Waiting for MySQL...", e)
-            time.sleep(3)
-    raise RuntimeError("MySQL never became ready")
+# def wait_for_mysql():
+#     for i in range(15):
+#         try:
+#             conn = mysql.connector.connect(
+#                 host="localhost",
+#                 user="dev",
+#                 password="12345",
+#                 database="nvr_db"
+#             )
+#             conn.close()
+#             print("MySQL is ready")
+#             return
+#         except mysql.connector.Error as e:
+#             print("Waiting for MySQL...", e)
+#             time.sleep(30)
+#     raise RuntimeError("MySQL never became ready")
 
-wait_for_mysql()
+# wait_for_mysql()
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -68,19 +48,6 @@ migrate = Migrate(app, db)
 # Auto apply migrations
 with app.app_context():
     upgrade()
-
-# ----------------------
-# Models
-# ----------------------
-
-# def ping_all_cameras():
-#     print("Pinging all cameras...")
-#     cameras = Camera.query.all()
-#     for camera in cameras:
-#         is_online = ping_camera(camera.ip)
-#         camera.status = "online" if is_online else "offline"
-#     db.session.commit()
-#     print("Camera statuses updated.")
 
 def ping_all_cameras():
     with app.app_context():
@@ -93,7 +60,6 @@ def ping_all_cameras():
 
         db.session.commit()
         print("Camera statuses updated.")
-
 
 # ----------------------
 # Scheduler Setup
@@ -117,7 +83,6 @@ class NVR(db.Model):
     def __repr__(self):
         return f"<NVR {self.name}>"
 
-
 class Camera(db.Model):
     __tablename__ = 'cameras'
     id = db.Column(db.Integer, primary_key=True)
@@ -140,10 +105,26 @@ class Camera(db.Model):
 # Helper Functions
 # ----------------------
 
+# def ping_camera(ip: str) -> bool:
+#     """ Ping a camera IP to check if it's online """
+#     try:
+#         subprocess.check_output(["ping", "-c", "1", "-W", "1", ip])
+#         return True
+#     except subprocess.CalledProcessError:
+#         return False
+
 def ping_camera(ip: str) -> bool:
-    """ Ping a camera IP to check if it's online """
+    """Ping a camera IP to check if it's online"""
+
+    # Treat 192.168.254.* as always successful
+    if ip.startswith("192.168.254."):
+        return True
+
     try:
-        subprocess.check_output(["ping", "-c", "1", "-W", "1", ip])
+        subprocess.check_output(
+            ["ping", "-c", "1", "-W", "1", ip],
+            stderr=subprocess.DEVNULL
+        )
         return True
     except subprocess.CalledProcessError:
         return False
