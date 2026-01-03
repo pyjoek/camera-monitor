@@ -12,24 +12,12 @@ services:
       - mysql_data:/var/lib/mysql
 
   flask_app:
-    build: ./backend
-    container_name: camera_api
-    depends_on:
-      - mysql
-    environment:
-      DATABASE_URL: "mysql+mysqlconnector://root:root@mysql/nvr_db"
+    image: pyjoek/goldcameramonitor-backend:latest
     ports:
-      - "5000:5000"
-    restart: always
+      - "8000:80"
 
   react_app:
-    build: ./react
-    container_name: camera_frontend
-    depends_on:
-      - flask_app
-    ports:
-      - "3000:3000"
-    restart: always
+    image: pyjoek/goldcameramonitor-frontend:latest
 
 volumes:
   mysql_data:
